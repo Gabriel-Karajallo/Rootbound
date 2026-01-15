@@ -5,11 +5,18 @@ import { GameScene } from "../scenes/GameScene";
 
 export const phaserConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  parent: "phaser-game",
-  width: 1280,
-  height: 720,
+
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 1280,
+    height: 720
+  },
+
   backgroundColor: "#000000",
+
   scene: [BootScene, MenuScene, GameScene],
+
   physics: {
     default: "arcade",
     arcade: {

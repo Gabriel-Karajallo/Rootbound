@@ -6,13 +6,11 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    // Aquí irán cargas de assets más adelante
+    // Más adelante cargaremos aquí assets
   }
 
   create() {
     console.log("BootScene iniciada");
     this.scene.start("MenuScene");
   }
-
-  
 }

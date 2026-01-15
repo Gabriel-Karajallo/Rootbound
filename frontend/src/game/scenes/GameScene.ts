@@ -6,6 +6,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.cameras.main.setBackgroundColor("#111111");
+
     this.add
       .text(640, 360, "GAME START", {
         fontSize: "32px",
