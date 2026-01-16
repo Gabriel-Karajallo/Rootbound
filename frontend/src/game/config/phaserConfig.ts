@@ -9,11 +9,19 @@ export const phaserConfig: Phaser.Types.Core.GameConfig = {
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 1280,
-    height: 720
+    width: 1920,
+    height: 1080,
+    zoom: window.devicePixelRatio || 1
   },
 
   backgroundColor: "#000000",
+
+  render: {
+    pixelArt: false,
+    antialias: true,
+    antialiasGL: true,
+    roundPixels: false
+  },
 
   scene: [BootScene, MenuScene, GameScene],
 
