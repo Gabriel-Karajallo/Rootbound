@@ -14,10 +14,16 @@ export class MenuScene extends Phaser.Scene {
 
     // Logo principal
     this.load.image("menuPrincipal", "assets/menu/logo.png");
+
+    // Sonido de selección
+    this.load.audio("uiSeleccion", "assets/audio/ui/seleccion.ogg");
   }
 
   create() {
     const { width, height } = this.scale;
+
+    // Fondo negro base
+    this.cameras.main.setBackgroundColor("#000000");
 
     // =========================
     // FONDO DEL MENÚ
@@ -29,11 +35,10 @@ export class MenuScene extends Phaser.Scene {
     // Ajuste para cubrir pantalla manteniendo proporción
     const scaleX = width / fondo.width;
     const scaleY = height / fondo.height;
-    const scale = Math.max(scaleX, scaleY);
-    fondo.setScale(scale);
+    fondo.setScale(Math.max(scaleX, scaleY));
 
     // =========================
-    // OVERLAY OSCURO (muy importante)
+    // OVERLAY OSCURO
     // =========================
     this.add
       .rectangle(0, 0, width * 2, height * 2, 0x000000, 0.55)
@@ -49,6 +54,14 @@ export class MenuScene extends Phaser.Scene {
       .setDepth(2);
 
     // =========================
+    // SONIDO
+    // =========================
+    const sonidoSeleccion = this.sound.add("uiSeleccion", {
+      volume: 0.25,
+      rate: 1,
+    });
+
+    // =========================
     // OPCIONES DE MENÚ
     // =========================
     const opciones = ["NUEVA PARTIDA", "OPCIONES"];
@@ -57,10 +70,13 @@ export class MenuScene extends Phaser.Scene {
       const opcion = this.add
         .text(width / 2, height * 0.62 + index * 42, texto, {
           fontSize: "22px",
-          color: "#666666",
+          color: "#555555",
         })
         .setOrigin(0.5)
         .setDepth(3);
+
+      // Shadow base apagado
+      opcion.setShadow(0, 0, "#6ecbff", 0, false, false);
 
       this.opcionesTexto.push(opcion);
     });
@@ -73,12 +89,20 @@ export class MenuScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown-UP", () => {
       this.opcionSeleccionada =
         (this.opcionSeleccionada - 1 + opciones.length) % opciones.length;
+
+      sonidoSeleccion.stop();
+      sonidoSeleccion.play({ seek: 0 });
+
       this.actualizarSeleccion();
     });
 
     this.input.keyboard?.on("keydown-DOWN", () => {
       this.opcionSeleccionada =
         (this.opcionSeleccionada + 1) % opciones.length;
+
+      sonidoSeleccion.stop();
+      sonidoSeleccion.play();
+
       this.actualizarSeleccion();
     });
 
@@ -92,9 +116,13 @@ export class MenuScene extends Phaser.Scene {
   // =========================
   private actualizarSeleccion() {
     this.opcionesTexto.forEach((opcion, index) => {
-      opcion.setColor(
-        index === this.opcionSeleccionada ? "#ffffff" : "#555555"
-      );
+      if (index === this.opcionSeleccionada) {
+        opcion.setColor("#ffffff");
+        opcion.setShadow(0, 0, "#6ecbff", 8, false, true);
+      } else {
+        opcion.setColor("#555555");
+        opcion.setShadow(0, 0, "#6ecbff", 0, false, false);
+      }
     });
   }
 
