@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import { BootScene } from "../scenes/BootScene";
 import { MenuScene } from "../scenes/MenuScene";
 import { GameScene } from "../scenes/GameScene";
+import { IntroScene } from "../scenes/IntroScene";
+import { IntroNarrativeScene } from "../scenes/IntroNarrativeScene";
 
 export const phaserConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -23,7 +25,7 @@ export const phaserConfig: Phaser.Types.Core.GameConfig = {
     roundPixels: false
   },
 
-  scene: [BootScene, MenuScene, GameScene],
+  scene: [IntroScene, BootScene, MenuScene, IntroNarrativeScene, GameScene],
 
   physics: {
     default: "arcade",

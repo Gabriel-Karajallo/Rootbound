@@ -6,7 +6,10 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    // Más adelante cargaremos aquí assets
+    this.load.audio(
+      "ambienteRaiz",
+      "assets/audio/ambient/ambiente_raiz.ogg"
+    );
   }
 
   create() {

@@ -3,6 +3,8 @@ import Phaser from "phaser";
 export class MenuScene extends Phaser.Scene {
   private opcionSeleccionada = 0;
   private opcionesTexto: Phaser.GameObjects.Text[] = [];
+  private musicaMenu!: Phaser.Sound.BaseSound;
+  private inputBloqueado = false;
 
   constructor() {
     super("MenuScene");
@@ -10,13 +12,18 @@ export class MenuScene extends Phaser.Scene {
 
   preload() {
     // Fondo del menú
-    this.load.image("fondoMenu", "assets/menu/fondo_menu.png");
+    this.load.image("fondoMenu", "assets/menu/fondo_menu2.png");
 
     // Logo principal
     this.load.image("menuPrincipal", "assets/menu/logo.png");
 
-    // Sonido de selección
+    // Sonidos UI
     this.load.audio("uiSeleccion", "assets/audio/ui/seleccion.ogg");
+    this.load.audio("uiConfirmar", "assets/audio/ui/confirmar.ogg");
+
+    // Música del menú
+    this.load.audio("musicaMenu", "assets/audio/music/menu.ogg");
+
   }
 
   create() {
@@ -25,6 +32,8 @@ export class MenuScene extends Phaser.Scene {
     // Fondo negro base
     this.cameras.main.setBackgroundColor("#000000");
 
+    this.cameras.main.fadeIn(800, 0, 0, 0);
+
     // =========================
     // FONDO DEL MENÚ
     // =========================
@@ -32,7 +41,9 @@ export class MenuScene extends Phaser.Scene {
       .image(width / 2, height / 2, "fondoMenu")
       .setDepth(0);
 
-    // Ajuste para cubrir pantalla manteniendo proporción
+    // Blur suave del fondo
+    fondo.preFX?.addBlur(2, 2, 1, 0.5);
+
     const scaleX = width / fondo.width;
     const scaleY = height / fondo.height;
     fondo.setScale(Math.max(scaleX, scaleY));
@@ -45,6 +56,8 @@ export class MenuScene extends Phaser.Scene {
       .setOrigin(0)
       .setDepth(1);
 
+      
+
     // =========================
     // LOGO
     // =========================
@@ -54,12 +67,17 @@ export class MenuScene extends Phaser.Scene {
       .setDepth(2);
 
     // =========================
-    // SONIDO
+    // SONIDOS
     // =========================
-    const sonidoSeleccion = this.sound.add("uiSeleccion", {
-      volume: 0.25,
-      rate: 1,
+    const sonidoSeleccion = this.sound.add("uiSeleccion", { volume: 0.25 });
+    const sonidoConfirmar = this.sound.add("uiConfirmar", { volume: 0.35 });
+
+    // Música del menú (audio ya desbloqueado en IntroScene)
+    this.musicaMenu = this.sound.add("musicaMenu", {
+      loop: true,
+      volume: 0.2,
     });
+    this.musicaMenu.play();
 
     // =========================
     // OPCIONES DE MENÚ
@@ -75,9 +93,7 @@ export class MenuScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setDepth(3);
 
-      // Shadow base apagado
       opcion.setShadow(0, 0, "#6ecbff", 0, false, false);
-
       this.opcionesTexto.push(opcion);
     });
 
@@ -87,27 +103,27 @@ export class MenuScene extends Phaser.Scene {
     // INPUT TECLADO
     // =========================
     this.input.keyboard?.on("keydown-UP", () => {
+      if (this.inputBloqueado) return;
       this.opcionSeleccionada =
         (this.opcionSeleccionada - 1 + opciones.length) % opciones.length;
 
-      sonidoSeleccion.stop();
       sonidoSeleccion.play({ seek: 0 });
-
       this.actualizarSeleccion();
     });
 
     this.input.keyboard?.on("keydown-DOWN", () => {
+      if (this.inputBloqueado) return;
       this.opcionSeleccionada =
         (this.opcionSeleccionada + 1) % opciones.length;
 
-      sonidoSeleccion.stop();
-      sonidoSeleccion.play();
-
+      sonidoSeleccion.play({ seek: 0 });
       this.actualizarSeleccion();
     });
 
     this.input.keyboard?.on("keydown-ENTER", () => {
-      this.seleccionarOpcion();
+      if (this.inputBloqueado) return;
+      sonidoConfirmar.play({ seek: 0 });
+      this.ejecutarOpcionSeleccionada();
     });
   }
 
@@ -129,15 +145,37 @@ export class MenuScene extends Phaser.Scene {
   // =========================
   // ACCIONES
   // =========================
-  private seleccionarOpcion() {
+  private ejecutarOpcionSeleccionada() {
     switch (this.opcionSeleccionada) {
       case 0:
-        this.scene.start("GameScene");
-        break;
+  this.inputBloqueado = true;
 
-      case 1:
-        console.log("Opciones (pendiente)");
-        break;
-    }
+  // Fade out visual
+  this.cameras.main.fadeOut(800, 0, 0, 0);
+
+  // Fade out de música
+  this.tweens.add({
+    targets: this.musicaMenu,
+    volume: 0,
+    duration: 800,
+    ease: "Sine.easeInOut",
+  });
+
+  // Cuando termina el fade visual, cambiamos de escena
+ this.cameras.main.once(
+  Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+  () => {
+    this.musicaMenu.stop();
+
+    // Entrar a la narrativa
+    this.scene.start("IntroNarrativeScene");
+  }
+);
+    break;
+
+        case 1:
+          console.log("Opciones (pendiente)");
+          break;
+      }
   }
 }
